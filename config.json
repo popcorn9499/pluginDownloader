@@ -1,0 +1,15 @@
+{
+    "data": {
+        "1": {
+            "fileName": "downloaded file name",
+            "url": "any random site that doesnt do weird download formatting for its downloads",
+            "type": "none"
+        },
+        "2": {
+            "fileName": "downloaded file name",
+            "url": "https://api.github.com/repos/(owner_name)/(repo_name)/releases/latest",
+            "type": "github",
+            "file": "github latest release file name"
+        }
+    }
+}
