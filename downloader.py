@@ -2,6 +2,8 @@ import json
 import urllib.request
 import requests
 import os
+import subprocess
+import sys
 
 tempDir = "./temp/"
 
@@ -39,7 +41,11 @@ def fileLoad(fileName):#loads files
 #download
 def download(url,fileName,directory): #downloads the file given
     # Download the file from `url` and save it locally under `file_name`:
-    urllib.request.urlretrieve(url,"{0}{1}".format(directory,fileName))
+    if sys.platform == "linux" or sys.platform == "linux2":
+        subprocess.check_output('wget -O {0} {1}'.format("{0}{1}".format(directory,fileName),url), shell=True)
+    elif sys.platform == "win32":
+       urllib.request.urlretrieve(url,"{0}{1}".format(directory,fileName)) 
+    
     print("done")
 
 #
@@ -56,20 +62,23 @@ else: #run program if config exists
     if os.path.isdir(tempDir) == False:
         os.mkdir(tempDir)
     mainData = config["data"]
+    
     for key,val in mainData.items(): #Looking through the data dictionary and cycling through it
-        if val["type"] == "github": #if its a file from github where the latest release downloads the json formatting for stuff
-            r = requests.get(val["url"])
-            data = r.json() #outputs the format as json
-            for key in data["assets"]: #sorts through the json till it finds the download that matches the file we want
-                if key["name"] == val["file"]:
-                    download(key["browser_download_url"],val["fileName"],tempDir)
-            #fileSave(val["fileName"],data["assets"])
-        else: #regular download
-            download(val["url"],val["fileName"],tempDir)
-        source="{0}{1}".format(tempDir,val["fileName"])
-        destination="Z:\\User\\Documents\\My_Files\\Development_Stuff\\Python\\downloadTests\\downloaded\\{0}".format(val["fileName"])
-        if os.path.isfile(destination) == True: #checks to see if the file already exists
-            os.remove(destination)#if so delete the file
-        os.rename(source,destination)#moves the output file to the correct location.
+        if val["download"] == "yes":
+            if val["type"] == "github": #if its a file from github where the latest release downloads the json formatting for stuff
+                r = requests.get(val["url"])
+                data = r.json() #outputs the format as json
+                for key in data["assets"]: #sorts through the json till it finds the download that matches the file we want
+                    if key["name"] == val["file"]:
+                        download(key["browser_download_url"],val["fileName"],tempDir)
+                #fileSave(val["fileName"],data["assets"])
+            else: #regular download
+                download(val["url"],val["fileName"],tempDir)
+            source="{0}{1}".format(tempDir,val["fileName"])
+            destination="{0}{1}".format(val["fileLocation"],val["fileName"])
+            if os.path.isfile(destination) == True: #checks to see if the file already exists
+                os.remove(destination)#if so delete the file
+            os.rename(source,destination)#moves the output file to the correct location.
 
         
+
